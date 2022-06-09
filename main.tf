@@ -1,75 +1,55 @@
-### CREATING THE VPC
-resource "aws_vpc" "main_vpc" {
-    cidr_block = var.vpc_cidr
+### This is why testing it on the AWS management console is important because 
+### you are following the step in the console with the steps in Terraform
 
-    tags = {
-        name = var.vpc_name
-    }
+### FOR EXAMPLE: Creating the subnet, if you see it on the console, you will need
+### to follow the same steps i.e. Vpc, cidr id, and the availability zone, etc 
+
+# Create a VPC
+# terraform aws vpc
+resource "aws_vpc" "vpc" {
+  cidr_block = "${var.vpc_cidr}"
+  instance_tenancy = "default"
+  enable_dns_hostnames = true
+
+  tags = {
+    # small n in name will only show on the tag name and not on the Name in the VPC table
+    # capital N in Name will show on the table Name and the tags
+    Name = "vpc_demo_terraform"
+  }
 }
 
 ### INTERNET GATEWAY
-resource "aws_internet_gateway" "internet_gateway" {
-    vpc_id = aws_vpc.main_vpc.id
-
-    tags = {
-      name = var.internet_gw_name
-    }
+### terraform aws internet gateway
+resource "aws_internet_gateway" "internet_gw" {
+  vpc_id = aws_vpc.vpc.id
+  
+  tags = {
+    Name = "VPC-Demo-Internet-Gateway"
+  }
 }
 
-### ELASTIC IP - PUBLIC NAT GATEWAY
-# ELASTIC NAT GATEWAY A
-resource "aws_eip" "nat_a_eip" {
-    instance = aws_instance.web.id
-    vpc = true
+### Public Subnet A
+### terraform aws subnet
+resource "aws_subnet" "public_subnet_a" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "${var.public_cidr_a}"
+  availability_zone = "${var.region}a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "VPC-Demo-Public-A"
+  }
 }
 
+### Private Subnet A
+### terraform aws subnet
+resource "aws_subnet" "private_subnet_a" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = var.private_cidr_a
+  availability_zone = "${var.region}a"
+  map_public_ip_on_launch = false
 
-### PUBLIC NAT GATEWAY
-resource "aws_nat_gateway" "nat_a" {
-    allocation_id = aws_eip.nat_a_eip.id
-    subnet_id = aws_subnet.public_a.id
-
-    tags = {
-      name = var.nat_gw_name
-    }
-
-    depends_on = [
-      aws_internet_gateway.internet_gateway
-    ]
-}
-
-### PUBLIC SUBNET
-resource "aws_subnet" "public_a" {
-    vpc_id = aws_vpc.main_vpc.id
-    cidr_block = var.public_cidr_a
-    availability_zone = "${var.region}a"
-    map_public_ip_on_launch = true
-    
-    tags = {
-        name = var.public_name
-    }
-}
-
-
-### PRIVATE SUBNET A
-resource "aws_subnet" "private_a" {
-    vpc_id = aws_vpc.main_vpc.id
-    cidr_block = var.private_cidr_a
-    availability_zone = "${var.region}a"
-
-    tags = {
-      name = var.private_a_name
-    }
-}
-
-
-### PRIVATE SUBNET B
-resource "aws_subnet" "private_b" {
-    vpc_id = aws_vpc.main_vpc.id
-    cidr_block = var.private_cidr_b
-    availability_zone = "${var.region}a"
-
-    tags = {
-      name = var.private_b_name
-    }
+  tags = {
+    Name = "VPC-Demo-Private-A"
+  }
 }
