@@ -41,6 +41,19 @@ resource "aws_subnet" "public_subnet_a" {
   }
 }
 
+### Public Subnet B
+### terraform aws subnet
+resource "aws_subnet" "public_subnet_b" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "${var.public_cidr_b}"
+  availability_zone = "${var.region}b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "VPC-Demo-Public-B"
+  }
+}
+
 ### Private Subnet A
 ### terraform aws subnet
 resource "aws_subnet" "private_subnet_a" {
@@ -51,5 +64,18 @@ resource "aws_subnet" "private_subnet_a" {
 
   tags = {
     Name = "VPC-Demo-Private-A"
+  }
+}
+
+### Private Subnet B
+### terraform aws subnet
+resource "aws_subnet" "private_subnet_b" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = var.private_cidr_b
+  availability_zone = "${var.region}b"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "VPC-Demo-Private-B"
   }
 }
